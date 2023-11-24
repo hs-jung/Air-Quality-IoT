@@ -46,15 +46,15 @@ while wlan.isconnected() == False:
     wlan.connect(settings.ssid, settings.password)
     time.sleep(3)
     print("Connected to wifi!")
-    my_ip: str = str(wlan.ifconfig()[0])
-    print("My IP Address: " + my_ip)
+    # my_ip: str = str(wlan.ifconfig()[0])
+    # print("My IP Address: " + my_ip)
 
-# start listening
-addr = socket.getaddrinfo("0.0.0.0", 80)[0][-1]
-s = socket.socket()
-s.bind(addr)
-s.listen(1)
-led.on()
+# # start listening
+# addr = socket.getaddrinfo("0.0.0.0", 80)[0][-1]
+# s = socket.socket()
+# s.bind(addr)
+# s.listen(1)
+# led.on()
 while True:
     print("Awaiting connection...")
     cl, addr = s.accept()
