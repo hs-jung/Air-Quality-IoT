@@ -37,17 +37,16 @@ time.sleep(2.0)
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 while wlan.isconnected() == False:
-
     # blip light
     led.on()
     time.sleep(0.1)
     led.off()
-    
+
     print("Attemping to connect to wifi...")
     wlan.connect(settings.ssid, settings.password)
     time.sleep(3)
     print("Connected to wifi!")
-    my_ip:str = str(wlan.ifconfig()[0])
+    my_ip: str = str(wlan.ifconfig()[0])
     print("My IP Address: " + my_ip)
 
 # start listening
@@ -60,7 +59,7 @@ while True:
     print("Awaiting connection...")
     cl, addr = s.accept()
     print("Connection from " + addr[0] + "!")
-    
+
     try:
 
         # collect bytes
@@ -68,13 +67,13 @@ while True:
         print(str(len(data)) + " bytes received")
 
         if len(data) > 0:
-        
+
             # parse
             req = request_tools.request.parse(data.decode())
-            
+
             if req.method.lower() == "get" and req.path.lower() == "/data":
                 print("It is a request for data")
-                
+
                 # perform measurements
                 print("Measuring AQI...")
                 aqi = ens.AQI
@@ -82,51 +81,52 @@ while True:
                 co2 = ens.CO2
                 print("Measuring TVOC...")
                 tvoc = ens.TVOC
-                
+
                 # perform measurements - AHT21
                 print("Measuring temperature and humidity...")
                 rht = aht.read()
                 humidity = rht[0]
                 temperature = rht[1]
-                
+
                 ReturnObj = {"aqi": aqi, "co2": co2, "tvoc": tvoc, "humidity": humidity, "temperature": temperature}
 
                 # Before responding... if the AQI/CO2/TVOC is 0, it means it needs to be reset. So reset.
                 if aqi == 0:
                     ens.reset()
-                
+
                 # respond with OK
                 print("Responding...")
-                cl.send("HTTP/1.0 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + json.dumps(ReturnObj))
+                cl.send(
+                    "HTTP/1.0 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + json.dumps(
+                        ReturnObj))
                 cl.close()
                 print("Responded!")
-                
+
             elif req.method.lower() == "get" and req.path.lower() == "/":
-                
+
                 f = open("page.html")
                 content = f.read()
                 f.close()
-                
+
                 # respond with OK
                 cl.send("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n" + content)
                 cl.close()
-                
+
             else:
                 cl.send("HTTP/1.0 404 NOT FOUND\r\n\r\n");
-                cl.close();  
+                cl.close();
 
-        else: # request of 0 bytes (connection?)
+        else:  # request of 0 bytes (connection?)
             print("Connection with 0 bytes was attempted! Closing...")
-            cl.close()  
-        
+            cl.close()
+
     except Exception as e:
         print("Fatal error! Msg: " + str(e))
         cl.send("HTTP/1.0 500 INTERNAL SERVER ERROR\r\n\r\n")
         cl.close()
-        
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
